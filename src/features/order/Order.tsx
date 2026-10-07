@@ -1,8 +1,16 @@
 // Test ID: IIDSAT
-import { useFetcher, useLoaderData } from "react-router-dom";
+import {
+  useFetcher,
+  useLoaderData,
+  type LoaderFunctionArgs,
+} from "react-router-dom";
 import OrderItem from "./OrderItem";
 
-import { getOrder } from "../../services/apiRestaurant";
+import {
+  getOrder,
+  type Order as OrderType,
+  type Pizza,
+} from "../../services/apiRestaurant";
 import {
   calcMinutesLeft,
   formatCurrency,
@@ -12,8 +20,8 @@ import UpdateOrder from "./UpdateOrder";
 import { useEffect } from "react";
 
 function Order() {
-  const order = useLoaderData();
-  const fetcher = useFetcher();
+  const order = useLoaderData() as OrderType;
+  const fetcher = useFetcher<Pizza[]>();
 
   useEffect(
     function () {
@@ -70,7 +78,7 @@ function Order() {
             key={item.pizzaId}
             isLoadingIngredients={fetcher.state === "loading"}
             ingredients={
-              fetcher?.data?.find((el) => el.id === item.pizzaId)
+              fetcher?.data?.find((el) => String(el.id) === item.pizzaId)
                 ?.ingredients ?? []
             }
           />
@@ -90,13 +98,17 @@ function Order() {
           To pay on delivery: {formatCurrency(orderPrice + priorityPrice)}
         </p>
       </div>
-      {!priority && <UpdateOrder order={order} />}
+      {!priority && <UpdateOrder />}
     </div>
   );
 }
 
-export async function loader({ params }) {
-  const order = await getOrder(params.orderID);
+export async function loader({
+  params,
+}: LoaderFunctionArgs): Promise<OrderType> {
+  const orderID = params.orderID;
+  if (!orderID) throw new Error("Order ID is required");
+  const order = await getOrder(orderID);
   return order;
 }
 

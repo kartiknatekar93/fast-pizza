@@ -1,18 +1,33 @@
-import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import {
+  createAsyncThunk,
+  createSlice,
+  type PayloadAction,
+} from "@reduxjs/toolkit";
 import { getAddress } from "../../services/apiGeocoding";
+import type { RootState } from "../../store";
 
-function getPosition() {
+interface GeoPosition {
+  latitude: number;
+  longitude: number;
+}
+
+interface AddessResult {
+  position: GeoPosition;
+  address: string;
+}
+
+function getPosition(): Promise<GeolocationPosition> {
   return new Promise(function (resolve, reject) {
     navigator.geolocation.getCurrentPosition(resolve, reject);
   });
 }
 
-export const fetchAddress = createAsyncThunk(
+export const fetchAddress = createAsyncThunk<AddessResult>(
   "user/fetchAddress",
   async function () {
     // 1) We get the user's geolocation position
     const positionObj = await getPosition();
-    const position = {
+    const position: GeoPosition = {
       latitude: positionObj.coords.latitude,
       longitude: positionObj.coords.longitude,
     };
@@ -26,7 +41,17 @@ export const fetchAddress = createAsyncThunk(
   },
 );
 
-const initialState = {
+type Status = "idle" | "isloading" | "error";
+
+interface UserState {
+  username: string;
+  status: Status;
+  position: Partial<GeoPosition>;
+  address: string;
+  error: string;
+}
+
+const initialState: UserState = {
   username: "",
   status: "idle",
   position: {},
@@ -38,13 +63,13 @@ const UserSlice = createSlice({
   name: "user",
   initialState,
   reducers: {
-    UpdateName(state, action) {
+    UpdateName(state, action: PayloadAction<string>) {
       state.username = action.payload;
     },
   },
   extraReducers: (builder) => {
     builder
-      .addCase(fetchAddress.pending, (state, action) => {
+      .addCase(fetchAddress.pending, (state) => {
         state.status = "isloading";
       })
       .addCase(fetchAddress.fulfilled, (state, action) => {
@@ -54,13 +79,13 @@ const UserSlice = createSlice({
       })
       .addCase(fetchAddress.rejected, (state, action) => {
         state.status = "error";
-        state.error = action.error.message;
+        state.error = action.error.message ?? "something is wrong";
       });
   },
 });
 
 export const { UpdateName } = UserSlice.actions;
 
-export const getUserName = (state) => state.userStore;
+export const getUserName = (state: RootState) => state.userStore;
 
 export default UserSlice.reducer;

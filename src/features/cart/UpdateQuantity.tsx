@@ -2,7 +2,12 @@ import { useDispatch } from "react-redux";
 import Button from "../../ui/Button";
 import { decrementItemQuantity, incrementItemQuantity } from "./CartSlice";
 
-function UpdateQuantity({ pizzaId, currentQuantity }) {
+interface UpdateQuantityProps {
+  pizzaId: string;
+  currentQuantity: number;
+}
+
+function UpdateQuantity({ pizzaId, currentQuantity }: UpdateQuantityProps) {
   const dispatch = useDispatch();
 
   return (

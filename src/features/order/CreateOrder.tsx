@@ -1,20 +1,33 @@
 import { useState } from "react";
-import { Form, redirect, useActionData, useNavigation } from "react-router-dom";
+import {
+  Form,
+  redirect,
+  useActionData,
+  useNavigation,
+  type ActionFunctionArgs,
+} from "react-router-dom";
 import { createOrder } from "../../services/apiRestaurant";
 import Button from "../../ui/Button";
-import { fetchAddress, getUserName } from "../user/UserSlice";
+import { fetchAddress, getUserName } from "../user/userSlice";
 import { useDispatch, useSelector } from "react-redux";
-import { clearCart, getCart, getTotalPrice } from "../cart/CartSlice";
+import {
+  type cartItem,
+  clearCart,
+  getCart,
+  getTotalPrice,
+} from "../cart/CartSlice";
 import EmptyCart from "../cart/EmptyCart";
 import store from "../../store";
 import { formatCurrency } from "../../utils/helpers";
-
+import type { AppDispatch } from "../../store";
 // https://uibakery.io/regex-library/phone-number
-const isValidPhone = (str) =>
+const isValidPhone = (str: string) =>
   /^\+?\d{1,4}?[-.\s]?\(?\d{1,3}?\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}$/.test(
     str,
   );
-
+interface FormErrors {
+  phone?: string;
+}
 function CreateOrder() {
   const navigation = useNavigation();
   const isSubmitting = navigation.state === "submitting";
@@ -25,11 +38,11 @@ function CreateOrder() {
     address,
     error: addressError,
   } = useSelector(getUserName);
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
 
   const isloading = addressStatus === "isloading";
 
-  const formErrors = useActionData();
+  const formErrors = useActionData() as FormErrors | undefined;
 
   const [withPriority, setWithPriority] = useState(false);
   const cart = useSelector(getCart);
@@ -106,7 +119,7 @@ function CreateOrder() {
             type="checkbox"
             name="priority"
             id="priority"
-            value={withPriority}
+            checked={withPriority}
             onChange={(e) => setWithPriority(e.target.checked)}
           />
           <label htmlFor="priority" className="font-medium">
@@ -136,19 +149,19 @@ function CreateOrder() {
   );
 }
 
-export async function action({ request }) {
+export async function action({ request }: ActionFunctionArgs) {
   const formData = await request.formData();
-  const data = Object.fromEntries(formData);
+  const data = Object.fromEntries(formData) as Record<string, string>;
 
   const order = {
-    ...data,
-    cart: JSON.parse(data.cart),
+    customer: data.customer,
+    phone: data.phone,
+    address: data.address,
+    cart: JSON.parse(data.cart) as cartItem[],
     priority: data.priority === "true",
   };
 
-  // console.log(order);
-
-  const errors = {};
+  const errors: FormErrors = {};
   if (!isValidPhone(order.phone))
     errors.phone =
       "Please give us your correct phone number. We might need it to contact you.";

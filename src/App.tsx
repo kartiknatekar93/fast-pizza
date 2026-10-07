@@ -6,7 +6,7 @@ import CreateOrder, {
   action as createLoaderaction,
 } from "./features/order/CreateOrder";
 import Order, { loader as orderLoader } from "./features/order/Order";
-import Error from "./ui/Error";
+import ErrorPage from "./ui/ErrorPage";
 import AppLayout from "./ui/AppLayout";
 
 import { Provider } from "react-redux";
@@ -15,7 +15,7 @@ import { action as updateOrderAction } from "./features/order/UpdateOrder";
 const router = createBrowserRouter([
   {
     element: <AppLayout />,
-    errorElement: <Error />,
+    errorElement: <ErrorPage />,
     children: [
       {
         path: "/",
@@ -25,7 +25,7 @@ const router = createBrowserRouter([
         path: "/menu",
         element: <Menu />,
         loader: menuLoader,
-        errorElement: <Error />,
+        errorElement: <ErrorPage />,
       },
       {
         path: "/cart",
@@ -40,7 +40,7 @@ const router = createBrowserRouter([
         path: "/order/:orderID",
         element: <Order />,
         loader: orderLoader,
-        errorElement: <Error />,
+        errorElement: <ErrorPage />,
         action: updateOrderAction,
       },
     ],

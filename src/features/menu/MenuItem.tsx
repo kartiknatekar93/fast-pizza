@@ -1,17 +1,27 @@
 import { useDispatch, useSelector } from "react-redux";
 import Button from "../../ui/Button";
 import { formatCurrency } from "../../utils/helpers";
-import { addItem, getCurrentQuantityById } from "../cart/CartSlice";
+import {
+  addItem,
+  getCurrentQuantityById,
+  type cartItem,
+} from "../cart/CartSlice";
 import DeleteItem from "../../ui/DeleteItem";
 import UpdateQuantity from "../cart/UpdateQuantity";
+import type { Pizza } from "../../services/apiRestaurant";
+import type { AppDispatch } from "../../store";
 
-function MenuItem({ pizza }) {
+interface MenuItemProps {
+  pizza: Pizza;
+}
+
+function MenuItem({ pizza }: MenuItemProps) {
   const { id, name, unitPrice, ingredients, soldOut, imageUrl } = pizza;
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
 
   function addItemHandler() {
-    const item = {
-      pizzaId: id,
+    const item: cartItem = {
+      pizzaId: String(id),
       name,
       quantity: 1,
       unitPrice,
@@ -20,9 +30,9 @@ function MenuItem({ pizza }) {
     dispatch(addItem(item));
   }
 
-  const currentQuantity = useSelector(getCurrentQuantityById(id));
+  const currentQuantity = useSelector(getCurrentQuantityById(String(id)));
 
-  const isincart = currentQuantity > 0;
+  const isIncart = currentQuantity > 0;
 
   return (
     <li className="flex gap-4 py-2">
@@ -44,13 +54,16 @@ function MenuItem({ pizza }) {
               Sold out
             </p>
           )}
-          {isincart && (
-            <UpdateQuantity pizzaId={id} currentQuantity={currentQuantity} />
+          {isIncart && (
+            <UpdateQuantity
+              pizzaId={String(id)}
+              currentQuantity={currentQuantity}
+            />
           )}
 
-          {isincart && <DeleteItem id={id} />}
+          {isIncart && <DeleteItem id={String(id)} />}
 
-          {!soldOut && !isincart && (
+          {!soldOut && !isIncart && (
             <Button type="small" onClick={addItemHandler}>
               Add to cart
             </Button>

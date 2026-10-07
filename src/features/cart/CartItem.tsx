@@ -3,8 +3,13 @@ import DeleteItem from "../../ui/DeleteItem";
 import UpdateQuantity from "./UpdateQuantity";
 import { useSelector } from "react-redux";
 import { getCurrentQuantityById } from "./CartSlice";
+import type { cartItem } from "./CartSlice";
 
-function CartItem({ item }) {
+interface CartItemProps {
+  item: cartItem;
+}
+
+function CartItem({ item }: CartItemProps) {
   const { pizzaId, name, quantity, totalPrice } = item;
   const currentQuantity = useSelector(getCurrentQuantityById(pizzaId));
   return (
@@ -15,7 +20,7 @@ function CartItem({ item }) {
       <div className="flex items-center justify-between sm:gap-6">
         <p className="text-sm font-bold">{formatCurrency(totalPrice)}</p>
         <UpdateQuantity pizzaId={pizzaId} currentQuantity={currentQuantity} />
-        <DeleteItem id={pizzaId}>Delete</DeleteItem>
+        <DeleteItem id={pizzaId}></DeleteItem>
       </div>
     </li>
   );

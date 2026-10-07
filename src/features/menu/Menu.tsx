@@ -1,10 +1,10 @@
 import { useLoaderData, useNavigation } from "react-router-dom";
-import { getMenu } from "../../services/apiRestaurant";
+import { getMenu ,type Pizza} from "../../services/apiRestaurant";
 import Menuitem from "./MenuItem";
 import Loader from "../../ui/Loader";
 
 function Menu() {
-  const menu = useLoaderData();
+  const menu = useLoaderData() as Pizza[];
   const navigation = useNavigation();
 
   if (navigation.state === "loading") return <Loader />;
@@ -18,9 +18,8 @@ function Menu() {
   );
 }
 
-export async function loader() {
+export async function loader() : Promise<Pizza []> {
   const menu = await getMenu();
-
   return menu;
 }
 
